@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import argparse
 from dataclasses import dataclass, replace
-from datetime import date, datetime, timezone
+from datetime import date, datetime, timedelta, timezone
 from html import escape
 from html.parser import HTMLParser
 import json
@@ -541,7 +541,7 @@ def run_summary(
     withheld_aliases = load_withheld_aliases(policy_path)
     if now.tzinfo is None or now.utcoffset() is None:
         raise ValueError("now must include a timezone")
-    day = now.astimezone(timezone.utc).date().isoformat()
+    day = now.astimezone(timezone(timedelta(hours=8))).date().isoformat()
     rss_path = output_dir / RSS_NAME
     html_path = output_dir / HTML_NAME
     focus_rss_paths = tuple(output_dir / name for name in FOCUS_RSS_NAMES)

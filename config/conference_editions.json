@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "editions": [
+    {"id":"dac-2026","venue":"dac","year":2026,"source":"crossref","container":"Proceedings of the 63rd ACM/IEEE Design Automation Conference","doi_roots":[],"exclude_children":[]},
+    {"id":"dac-ieee-2026","venue":"dac","year":2026,"source":"ieee","container":"2026 ACM/IEEE Design Automation Conference (DAC)","search_title":"Design Automation Conference","doi_roots":[],"exclude_children":[]},
+    {"id":"iccad-2026","venue":"iccad","year":2026,"source":"crossref","container":"Proceedings of the 45th International Conference on Computer-Aided Design","doi_roots":[],"exclude_children":[]},
+    {"id":"iccad-ieee-2026","venue":"iccad","year":2026,"source":"ieee","container":"2026 IEEE/ACM International Conference on Computer-Aided Design (ICCAD)","search_title":"International Conference on Computer-Aided Design","doi_roots":[],"exclude_children":[]},
+    {"id":"micro-2026","venue":"micro","year":2026,"source":"crossref","container":"Proceedings of the 59th Annual IEEE/ACM International Symposium on Microarchitecture","doi_roots":[],"exclude_children":[]},
+    {"id":"micro-ieee-2026","venue":"micro","year":2026,"source":"ieee","container":"2026 IEEE/ACM International Symposium on Microarchitecture (MICRO)","search_title":"International Symposium on Microarchitecture","doi_roots":[],"exclude_children":[]},
+    {"id":"isca-2026","venue":"isca","year":2026,"source":"ieee","container":"2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)","doi_roots":[],"exclude_children":[]},
+    {"id":"hpca-2026","venue":"hpca","year":2026,"source":"ieee","container":"2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)","doi_roots":[],"exclude_children":[]},
+    {"id":"isscc-2026","venue":"isscc","year":2026,"source":"ieee","container":"2026 IEEE International Solid-State Circuits Conference (ISSCC)","doi_roots":[],"exclude_children":[]},
+    {"id":"vlsi-2026","venue":"vlsi","year":2026,"source":"ieee","container":"2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)","doi_roots":[],"exclude_children":[]},
+    {"id":"fmcad-2026","venue":"fmcad","year":2026,"source":"datacite","container":"Proceedings of the 26th Conference on Formal Methods in Computer-Aided Design (FMCAD 2026)","doi_roots":["10.34727/2026/isbn.978-3-85448-093-8"],"exclude_children":[1,2,3,4,5]},
+    {"id":"cav-i-2026","venue":"cav","year":2026,"source":"crossref","container":"Computer Aided Verification","doi_roots":["10.1007/978-3-032-32519-8","10.1007/978-3-032-32526-6","10.1007/978-3-032-32537-2"],"exclude_children":[],"exclude_dois":["10.1007/978-3-032-32519-8_1"]},
+    {"id":"asplos-v1-2026","venue":"asplos","year":2026,"source":"crossref","container":"Proceedings of the 31st ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 1","doi_roots":["10.1145/3760250"],"exclude_children":[],"publication_dates":["2025-12-11"]},
+    {"id":"asplos-v2-2026","venue":"asplos","year":2026,"source":"crossref","container":"Proceedings of the 31st ACM International Conference on Architectural Support for Programming Languages and Operating Systems, Volume 2","doi_roots":["10.1145/3779212"],"exclude_children":[],"publication_dates":["2026-03-22"],"exclude_dois":["10.1145/3779212.3795611","10.1145/3779212.3795612","10.1145/3779212.3795613"]}
+  ]
+}

@@ -8,3 +8,4 @@ __pycache__/
 .ic-feed-publication.*
 build/
 dist/
+.superpowers/

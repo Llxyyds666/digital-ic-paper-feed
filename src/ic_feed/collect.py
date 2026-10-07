@@ -6,20 +6,23 @@ from dataclasses import dataclass
 from datetime import date, datetime, timedelta, timezone
 import io
 import json
+import os
 from pathlib import Path
 import re
 import sys
+import time
 from typing import Callable, Iterable
 
 from ic_feed.atomic import CommitResult, atomic_write_text, commit_staged, discard_staged, raise_with_cleanup, stage_text, validate_output_layout
 from ic_feed.config import load_config
-from ic_feed.filtering import QueryRules, load_rules, matches_rules
+from ic_feed.filtering import QueryRules, _contains_phrase, _normalize_text, load_rules, matches_rules
 from ic_feed.http import FetchError, fetch_bytes
 from ic_feed.models import PaperRecord, SourceFailure
 from ic_feed.normalize import group_records, merge_records, record_key
 from ic_feed.publication import is_repository_artifact
 from ic_feed.render import render_rss
-from ic_feed.sources import arxiv, crossref, openalex
+from ic_feed.retry import RetryPolicy, call_with_retry
+from ic_feed.sources import arxiv, conferences, crossref, openalex
 from ic_feed.sources.rss import collect_rss
 from ic_feed.state import FeedState, SourceContinuation, load_state, stage_state
 from ic_feed.venues import match_venue
@@ -55,7 +58,7 @@ def _read_scholarly_queries(path: Path) -> list[ScholarlyQuery]:
             raise ValueError("invalid scholarly query entry")
         if type(item["id"]) is not str or not re.fullmatch(r"[a-z0-9-]+", item["id"]):
             raise ValueError("invalid scholarly query id")
-        if item["source"] not in {"crossref", "arxiv", "openalex"} or type(item["query"]) is not str or not item["query"].strip():
+        if item["source"] not in {"crossref", "arxiv", "openalex", "ieee", "conference"} or type(item["query"]) is not str or not item["query"].strip():
             raise ValueError("invalid scholarly query source or query")
         if type(item["limit"]) is not int or not 1 <= item["limit"] <= 2000:
             raise ValueError("invalid scholarly query limit")
@@ -75,6 +78,7 @@ class ScholarlyHarvest:
     continuation: SourceContinuation | None
     complete: bool
     pages_fetched: int
+    completed_through: date | None = None
 
 
 def merge_into_state(state: FeedState, incoming: Iterable[PaperRecord], rules: QueryRules) -> CollectionStats:
@@ -85,7 +89,13 @@ def merge_into_state(state: FeedState, incoming: Iterable[PaperRecord], rules: Q
         key for key in state.pending_ai if state.papers[key].ai_relevant is not None
     }
     for record in incoming:
-        if is_repository_artifact(record) or match_venue(record) is None or not matches_rules(record, rules):
+        venue = match_venue(record)
+        missing_conference_abstract = (venue is not None and venue.kind == 'conference'
+            and not record.abstract.strip()
+            and not any(_contains_phrase(_normalize_text(record.title),term) for term in rules.obvious_noise))
+        if (is_repository_artifact(record) or venue is None
+                or (venue.kind == 'conference' and conferences.is_auxiliary_title(record.title))
+                or not (matches_rules(record, rules) or missing_conference_abstract)):
             filtered += 1
             continue
         key = record_key(record)
@@ -157,8 +167,9 @@ def _collect_scholarly(
     fetcher: Callable[[str], object],
     rows: int,
     continuation: SourceContinuation | None = None,
+    *, attempts: int = 3,
 ) -> ScholarlyHarvest:
-    module = {"openalex": openalex, "crossref": crossref, "arxiv": arxiv}[name]
+    module = {"openalex": openalex, "crossref": crossref, "arxiv": arxiv, "conference": conferences}[name]
     limit = min(rows, 2000)
     original_from_date = continuation.from_date if continuation is not None else from_date
     cursor = continuation.cursor if continuation is not None else "*"
@@ -178,25 +189,32 @@ def _collect_scholarly(
         except Exception as error:
             return ScholarlyHarvest(name, [], _failure(url, error), None, False, 0)
 
-    page_limit = {"openalex": 200, "crossref": 1000}[name]
+    page_limit = {"openalex": 200, "crossref": 1000, "conference":1000}[name]
+    datacite = name == 'conference' and conferences.get_edition(query).source == 'datacite'
+    if name == 'conference':
+        cursor = conferences.initial_cursor(query,cursor,min(limit,page_limit))
     while len(records) < limit and examined_items < limit:
         requested_rows = min(limit - examined_items, page_limit)
+        if datacite:
+            requested_rows = conferences.page_size(cursor)
+            if requested_rows > limit-examined_items:
+                break
         url = module.build_url(query, original_from_date, requested_rows, cursor)
         try:
-            result = fetcher(url)
-            status = getattr(result, "status")
-            if not 200 <= status < 300:
-                failure = SourceFailure(datetime.now(timezone.utc), f"http_{status}", url, f"HTTP {status}")
-                return ScholarlyHarvest(
-                    name,
-                    records,
-                    failure,
-                    SourceContinuation(original_from_date, cursor),
-                    False,
-                    pages_fetched,
-                )
-            page = module.parse_page(getattr(result, "body"))
+            def read_page():
+                result = fetcher(url)
+                status = getattr(result, "status")
+                if not 200 <= status < 300:
+                    raise FetchError(status=status,category=f'http_{status}',detail=f'HTTP {status}')
+                return (module.parse_page(query,getattr(result,'body'),cursor) if name == 'conference'
+                        else module.parse_page(getattr(result,'body')))
+            page = call_with_retry(read_page,lambda error:isinstance(error,(ValueError,UnicodeError))
+                and not isinstance(error,conferences.ChangedTotalError),
+                policy=RetryPolicy(attempts,tuple(float(2**i) for i in range(attempts-1))),wait=time.sleep)
         except Exception as error:
+            if name == 'conference' and isinstance(error,conferences.ChangedTotalError):
+                return ScholarlyHarvest(name,records,_failure(url,error),
+                    SourceContinuation(original_from_date,conferences.restarted_cursor(query,cursor)),False,pages_fetched)
             return ScholarlyHarvest(
                 name,
                 records,
@@ -238,6 +256,51 @@ def _collect_scholarly(
     )
 
 
+def _collect_ieee(query: str, from_date: date, until_date: date, rows: int,
+                  key: str, continuation: SourceContinuation | None,
+                  *, timeout_seconds: float = 20, attempts: int = 3) -> ScholarlyHarvest:
+    """Advance one frozen IEEE insertion window, without persisting its API URL."""
+    from ic_feed.sources import ieee
+    start_record = 1
+    total = None
+    if continuation is not None:
+        progress = json.loads(continuation.cursor)
+        from_date = continuation.from_date
+        until_date = date.fromisoformat(progress['until_date'])
+        start_record = progress['start_record']
+        total = progress.get('total_records')
+        if type(start_record) is not int or start_record < 1:
+            raise ValueError('invalid IEEE continuation offset')
+    records = []
+    pages = examined = 0
+    def checkpoint():
+        return SourceContinuation(from_date,json.dumps({'start_record':start_record,
+            'until_date':until_date.isoformat(),'total_records':total},separators=(',',':')))
+    while examined < rows:
+        size = min(200,rows-examined)
+        if total is not None:
+            size = min(size,max(1,total-start_record+1))
+        try:
+            page = ieee.request_page(query,from_date,until_date,start_record,size,key,
+                timeout_seconds=timeout_seconds,attempts=attempts)
+        except Exception as error:
+            category = error.category if isinstance(error,ieee.IeeeFetchError) else 'network_error'
+            detail = error.detail if isinstance(error,ieee.IeeeFetchError) else 'IEEE discovery failed'
+            failure = SourceFailure(datetime.now(timezone.utc),category,'ieee:'+query,detail)
+            return ScholarlyHarvest('ieee',records,failure,checkpoint(),False,pages)
+        pages += 1
+        total = page.total_records
+        records.extend(page.records)
+        examined += page.item_count
+        start_record += page.item_count
+        if total == 0 or start_record > total:
+            return ScholarlyHarvest('ieee',records,None,None,True,pages,until_date)
+        if not page.item_count:
+            failure = SourceFailure(datetime.now(timezone.utc),'parse_error','ieee:'+query,'IEEE pagination did not advance')
+            return ScholarlyHarvest('ieee',records,failure,checkpoint(),False,pages)
+    return ScholarlyHarvest('ieee',records,None,checkpoint(),False,pages)
+
+
 def _write_failures(path: Path, failures: list[SourceFailure]) -> CommitResult:
     output = io.StringIO(newline="")
     writer = csv.writer(output, delimiter="\t", lineterminator="\n")
@@ -274,10 +337,18 @@ def main(argv: list[str] | None = None, *, now: Callable[[], datetime] | None = 
     records: list[PaperRecord] = []
     failures: list[SourceFailure] = []
     successful_sources: list[str] = []
+    completed_watermarks: dict[str, str] = {}
     scholarly_progress = False
+    checkpoint_changed = False
+    unpublished_checkpoints: dict[str, SourceContinuation] = {}
+    ieee_key = os.environ.get('IEEE_API_KEY','').strip()
+    entries = _read_scholarly_queries(args.scholarly_queries)
+    ieee_primary = bool(ieee_key and any(e.source == 'ieee' for e in entries))
 
     for row in _read_sources(args.sources):
         url = row["url"].strip()
+        if ieee_primary and url.startswith('https://ieeexplore.ieee.org/rss/'):
+            continue
         collected, failure = collect_rss(url, fetcher)
         source_name = f"rss:{url}"
         if failure is None:
@@ -286,43 +357,75 @@ def main(argv: list[str] | None = None, *, now: Callable[[], datetime] | None = 
         else:
             failures.append(failure)
 
-    for entry in _read_scholarly_queries(args.scholarly_queries):
+    for entry in entries:
         name = entry.source
         source_key = entry.key
         continuation = state.source_continuations.get(source_key)
         from_date = continuation.from_date if continuation is not None else _watermark_date(
             state, source_key, current_time, config.collection.lookback_days
         )
-        harvest = _collect_scholarly(
-            name,
-            entry.query,
-            from_date,
-            fetcher,
-            entry.limit,
-            continuation,
-        )
+        edition = conferences.get_edition(entry.query) if name == 'conference' else None
+        if name == 'ieee' or (edition and edition.source == 'ieee'):
+            if not ieee_key:
+                print(f'{source_key}: unavailable (IEEE_API_KEY not configured)')
+                continue
+            query = entry.query if edition is None else f'conference:{edition.year}:{edition.search_title or edition.container}'
+            if edition and continuation is None and source_key not in state.source_watermarks:
+                from_date = date(edition.year-1,1,1)
+            harvest = _collect_ieee(query,from_date,current_time.date(),entry.limit,ieee_key,continuation,
+                timeout_seconds=config.collection.http_timeout_seconds,attempts=config.collection.http_attempts)
+            if edition:
+                harvest.records[:] = [r for r in harvest.records if conferences.edition_accepts(edition,r)]
+            else:
+                frozen_until = (date.fromisoformat(json.loads(continuation.cursor)['until_date'])
+                    if continuation is not None else current_time.date())
+                cutoff = frozen_until-timedelta(days=config.collection.lookback_days)
+                harvest.records[:] = [r for r in harvest.records if r.published_at.date() >= cutoff]
+        else:
+            if entry.source == 'crossref' and entry.query.startswith('journal:') and continuation is None:
+                from_date = (current_time-timedelta(days=config.collection.lookback_days)).date()
+            harvest = _collect_scholarly(name,entry.query,from_date,fetcher,entry.limit,continuation,
+                attempts=config.collection.http_attempts)
         records.extend(harvest.records)
+        print(f'{source_key}: records={len(harvest.records)} pages={harvest.pages_fetched} '
+              f'status={"failed" if harvest.failure else "complete" if harvest.complete else "continuing"}')
         if harvest.failure is not None:
             failures.append(harvest.failure)
         if harvest.complete:
             state.source_continuations.pop(source_key, None)
             successful_sources.append(source_key)
+            if harvest.completed_through is not None:
+                completed_watermarks[source_key] = datetime.combine(harvest.completed_through,datetime.min.time(),tzinfo=timezone.utc).isoformat()
             scholarly_progress = True
-        elif harvest.pages_fetched:
-            if harvest.continuation is None:
-                raise RuntimeError(f"{name} pagination stopped without a continuation")
+        elif harvest.continuation is not None and (harvest.pages_fetched or name in {'ieee','conference'}):
+            checkpoint_changed |= state.source_continuations.get(source_key) != harvest.continuation
             state.source_continuations[source_key] = harvest.continuation
             state.source_watermarks.pop(source_key, None)
-            scholarly_progress = True
+            scholarly_progress |= harvest.failure is None and harvest.pages_fetched > 0
+            if harvest.records and harvest.pages_fetched:
+                # State-only failure publication cannot publish new feed membership.
+                # Re-read these pages if the entire run fails, never skip their records.
+                if continuation is not None:
+                    unpublished_checkpoints[source_key] = continuation
+                elif name == 'ieee' or (edition and edition.source == 'ieee'):
+                    progress = json.loads(harvest.continuation.cursor)
+                    progress['start_record'] = 1
+                    unpublished_checkpoints[source_key] = SourceContinuation(
+                        harvest.continuation.from_date,json.dumps(progress,separators=(',',':')))
+                else:
+                    unpublished_checkpoints[source_key] = SourceContinuation(harvest.continuation.from_date,'*')
 
     failure_result = _write_failures(args.failures, failures)
     _report_cleanup_debt(failure_result)
     if not successful_sources and not scholarly_progress:
+        if checkpoint_changed:
+            state.source_continuations.update(unpublished_checkpoints)
+            _report_cleanup_debt(commit_staged([stage_state(args.state,state)]))
         return 2
 
     stats = merge_into_state(state, records, rules)
     for source_name in successful_sources:
-        state.source_watermarks[source_name] = current_time.isoformat()
+        state.source_watermarks[source_name] = completed_watermarks.get(source_name,current_time.isoformat())
     xml = render_rss(list(state.papers.values()), config.publication.title, config.publication.base_url, config.collection.raw_feed_max_items)
     staged = []
     try:

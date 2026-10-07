@@ -53,6 +53,18 @@ def test_collect_commits_only_collection_outputs_after_validation():
     assert 'python -m ic_feed.collect' in step(workflow, 'Collect digital IC literature')['run']
     assert 'python -m ic_feed.validate' in step(workflow, 'Validate collected publication')['run']
     assert "steps.validate.outcome == 'success'" in publish['if']
+    assert step(workflow,'Collect digital IC literature')['env']['IEEE_API_KEY'] == '${{ secrets.IEEE_API_KEY }}'
+
+
+def test_collect_validates_failure_checkpoint_and_propagates_failure():
+    workflow = load('collect.yml')
+    validate = step(workflow,'Validate collected publication')
+    assert "steps.collect.outcome == 'success'" in validate['if']
+    assert "steps.collect.outcome == 'failure'" in validate['if']
+    publish = step(workflow,'Commit and push collection outputs')
+    assert publish['env']['PUBLICATION_OUTCOME'] == '${{ steps.validate.outcome }}'
+    failure = step(workflow,'Propagate collection failure')
+    assert "steps.collect.outcome == 'failure'" in failure['if'] and failure['run'] == 'exit 1'
 
 
 def test_summary_secret_boundary_missing_key_skip_and_invalid_publication_usage_only():
@@ -186,3 +198,18 @@ def test_unchanged_successful_summary_is_ready_for_no_recommendation_notificatio
     before = command('rev-parse', 'HEAD').stdout
     assert 'ready=true' in run_summary_publish(repo, bash, tmp_path, 'success')
     assert command('rev-parse', 'HEAD').stdout == before
+
+
+@pytest.mark.parametrize('validation', ['success','failure','skipped'])
+def test_failed_collection_only_publishes_validated_checkpoint_and_failure_log(git_publication_repo, validation):
+    repo, bash, command = git_publication_repo
+    (repo/'state.json').write_text('new frozen checkpoint\n',encoding='utf-8')
+    (repo/'filtered_feed.xml').write_text('unvalidated feed mutation\n',encoding='utf-8')
+    (repo/'fetch_failures.tsv').write_text('logged source failure\n',encoding='utf-8')
+    script = step(load('collect.yml'),'Commit and push collection outputs')['run']
+    env = {**os.environ,'GITHUB_REF_NAME':'main','COLLECTION_OUTCOME':'failure','PUBLICATION_OUTCOME':validation}
+    subprocess.run([bash,'-c',script],cwd=repo,env=env,check=True,capture_output=True,text=True)
+    expected = 'new frozen checkpoint\n' if validation == 'success' else 'initial content\n'
+    assert command('show','origin/main:state.json').stdout == expected
+    assert command('show','origin/main:filtered_feed.xml').stdout == 'initial content\n'
+    assert command('show','origin/main:fetch_failures.tsv').stdout == 'logged source failure\n'

@@ -85,6 +85,19 @@ def pending_state(tmp_path):
     return state_path, record
 
 
+@pytest.mark.parametrize('previous_day,processed',[('2026-10-07',1),('2026-10-08',0)])
+def test_daily_backfill_budget_resets_at_beijing_midnight(tmp_path,previous_day,processed):
+    state_path,_ = pending_state(tmp_path)
+    usage = {'date':previous_day,'candidates':100,'processed':100,'selected':0,'requests':10,
+        'prompt_tokens':0,'completion_tokens':0,'total_tokens':0,'token_usage_complete':True}
+    (tmp_path/'ai_usage.json').write_text(json.dumps([usage]),encoding='utf-8')
+    stats = run_summary(config(),state_path,ScreeningClient(),
+        datetime(2026,10,7,16,1,tzinfo=timezone.utc),output_dir=tmp_path)
+    assert stats.processed == processed
+    if processed:
+        assert json.loads((tmp_path/'ai_usage.json').read_text(encoding='utf-8'))[-1]['date'] == '2026-10-08'
+
+
 def test_online_summary_publishes_all_topic_feeds_and_recommendation_plan(tmp_path):
     state_path, record = pending_state(tmp_path)
     plan_path = tmp_path / "notification.json"

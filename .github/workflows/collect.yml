@@ -37,11 +37,13 @@ jobs:
       - name: Collect digital IC literature
         id: collect
         continue-on-error: true
+        env:
+          IEEE_API_KEY: ${{ secrets.IEEE_API_KEY }}
         run: python -m ic_feed.collect --config paper_feed_config.json --state state.json
 
       - name: Validate collected publication
         id: validate
-        if: ${{ steps.collect.outcome == 'success' }}
+        if: ${{ always() && (steps.collect.outcome == 'success' || steps.collect.outcome == 'failure') }}
         continue-on-error: true
         run: python -m ic_feed.validate
 
@@ -50,6 +52,7 @@ jobs:
         shell: bash
         env:
           COLLECTION_OUTCOME: ${{ steps.collect.outcome }}
+          PUBLICATION_OUTCOME: ${{ steps.validate.outcome }}
         run: |
           allowed_outputs=(
             "filtered_feed.xml"
@@ -58,6 +61,9 @@ jobs:
           )
           if [[ "${COLLECTION_OUTCOME}" == "failure" ]]; then
             allowed_outputs=("fetch_failures.tsv")
+            if [[ "${PUBLICATION_OUTCOME}" == "success" ]]; then
+              allowed_outputs+=("state.json")
+            fi
           fi
           existing_outputs=()
           for output in "${allowed_outputs[@]}"; do

@@ -84,7 +84,7 @@ def _date(value: object, field_name: str) -> date:
 
 
 def _continuation_from_payload(source: str, payload: object) -> SourceContinuation:
-    if not re.fullmatch(r"(?:openalex|crossref)(?::[a-z0-9-]+)?", source):
+    if not re.fullmatch(r"(?:openalex|crossref|ieee|conference)(?::[a-z0-9-]+)?", source):
         raise ValueError("only cursor-paginated sources may have continuations")
     if type(payload) is not dict or set(payload) != CONTINUATION_FIELDS:
         raise ValueError("source continuation must contain the exact schema fields")

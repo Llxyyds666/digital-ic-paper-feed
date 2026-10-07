@@ -45,7 +45,7 @@ def _conference_matches(container: str, alias: str, venue_id: str) -> bool:
     """Allow publication wrappers around a complete configured conference name."""
     acronym = re.escape(_normalize(venue_id))
     prefix = (
-        rf"(?:proceedings(?: of(?: the)?)?|the|annual|acm|ieee|{acronym}|"
+        rf"(?:proceedings(?: of(?: the)?)?|the|annual|acm|ieee|{('jsap|' if venue_id == 'vlsi' else '')}{acronym}|"
         r"\d{1,4}(?:st|nd|rd|th)?)"
     )
     suffix = (
