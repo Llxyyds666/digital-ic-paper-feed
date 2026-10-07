@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "venues": [
+    {"id":"tcad","name":"IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems","kind":"journal","aliases":["IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems"]},
+    {"id":"tvlsi","name":"IEEE Transactions on Very Large Scale Integration (VLSI) Systems","kind":"journal","aliases":["IEEE Transactions on Very Large Scale Integration VLSI Systems"]},
+    {"id":"todaes","name":"ACM Transactions on Design Automation of Electronic Systems","kind":"journal","aliases":["ACM Transactions on Design Automation of Electronic Systems"]},
+    {"id":"tc","name":"IEEE Transactions on Computers","kind":"journal","aliases":["IEEE Transactions on Computers"]},
+    {"id":"jssc","name":"IEEE Journal of Solid-State Circuits","kind":"journal","aliases":["IEEE Journal of Solid-State Circuits"]},
+    {"id":"dac","name":"DAC — Design Automation Conference","kind":"conference","aliases":["Design Automation Conference"]},
+    {"id":"iccad","name":"ICCAD — International Conference on Computer-Aided Design","kind":"conference","aliases":["International Conference on Computer Aided Design"]},
+    {"id":"fmcad","name":"FMCAD — Formal Methods in Computer-Aided Design","kind":"conference","aliases":["Formal Methods in Computer Aided Design", "Conference on Formal Methods in Computer-Aided Design"]},
+    {"id":"cav","name":"CAV — Computer Aided Verification","kind":"conference","aliases":["Computer Aided Verification"]},
+    {"id":"isca","name":"ISCA — International Symposium on Computer Architecture","kind":"conference","aliases":["International Symposium on Computer Architecture"]},
+    {"id":"micro","name":"MICRO — International Symposium on Microarchitecture","kind":"conference","aliases":["International Symposium on Microarchitecture"]},
+    {"id":"hpca","name":"HPCA — International Symposium on High Performance Computer Architecture","kind":"conference","aliases":["International Symposium on High Performance Computer Architecture"]},
+    {"id":"asplos","name":"ASPLOS — Architectural Support for Programming Languages and Operating Systems","kind":"conference","aliases":["International Conference on Architectural Support for Programming Languages and Operating Systems"]},
+    {"id":"isscc","name":"ISSCC — International Solid-State Circuits Conference","kind":"conference","aliases":["International Solid-State Circuits Conference"]},
+    {"id":"vlsi","name":"VLSI Symposium — Technology and Circuits","kind":"conference","aliases":["Symposium on VLSI Technology and Circuits", "Symposium on VLSI Technology and Circuits VLSI Technology and Circuits", "Symposium on VLSI Circuits"]}
+  ]
+}

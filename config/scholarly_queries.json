@@ -1,0 +1,20 @@
+{
+  "version": 1,
+  "queries": [
+    {"id": "tcad", "source": "crossref", "query": "journal:0278-0070", "limit": 300},
+    {"id": "tvlsi", "source": "crossref", "query": "journal:1063-8210", "limit": 300},
+    {"id": "tc", "source": "crossref", "query": "journal:0018-9340", "limit": 300},
+    {"id": "todaes", "source": "crossref", "query": "journal:1084-4309", "limit": 300},
+    {"id": "jssc", "source": "crossref", "query": "journal:0018-9200", "limit": 300},
+    {"id": "dac-score", "source": "crossref", "query": "venue:Design Automation Conference", "limit": 300},
+    {"id": "iccad-score", "source": "crossref", "query": "venue:International Conference on Computer-Aided Design", "limit": 300},
+    {"id": "fmcad-score", "source": "crossref", "query": "venue:Formal Methods in Computer-Aided Design", "limit": 300},
+    {"id": "cav-exact", "source": "crossref", "query": "container:Computer Aided Verification", "limit": 300},
+    {"id": "isca-score", "source": "crossref", "query": "venue:International Symposium on Computer Architecture", "limit": 300},
+    {"id": "micro-score", "source": "crossref", "query": "venue:International Symposium on Microarchitecture", "limit": 300},
+    {"id": "hpca-score", "source": "crossref", "query": "venue:International Symposium on High Performance Computer Architecture", "limit": 300},
+    {"id": "asplos-score", "source": "crossref", "query": "venue:International Conference on Architectural Support for Programming Languages and Operating Systems", "limit": 300},
+    {"id": "isscc-score", "source": "crossref", "query": "venue:International Solid-State Circuits Conference", "limit": 300},
+    {"id": "vlsi-score", "source": "crossref", "query": "venue:Symposium on VLSI Technology and Circuits", "limit": 300}
+  ]
+}

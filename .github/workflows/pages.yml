@@ -1,0 +1,84 @@
+name: Deploy digital IC Pages
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'ai_summary.html'
+      - 'filtered_feed.xml'
+      - 'ai_summary_feed.xml'
+      - 'design_verification_feed.xml'
+      - 'design_feed.xml'
+      - 'verification_feed.xml'
+      - 'ai_usage.json'
+      - 'assets/**'
+      - '.github/workflows/pages.yml'
+  workflow_run:
+    workflows: ['Collect digital IC literature', 'Summarize digital IC literature']
+    branches: [main]
+    types: [completed]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: digital-ic-pages-${{ github.repository }}
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Check out current main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install project
+        run: python -m pip install .
+
+      - name: Validate publication before deployment
+        run: python -m ic_feed.validate
+
+      - name: Configure Pages
+        uses: actions/configure-pages@v5
+
+      - name: Stage public site
+        shell: bash
+        run: |
+          public_files=(
+            "index.html"
+            "ai_summary.html"
+            "filtered_feed.xml"
+            "ai_summary_feed.xml"
+            "design_verification_feed.xml"
+            "design_feed.xml"
+            "verification_feed.xml"
+            "ai_usage.json"
+          )
+          mkdir -p _site/assets
+          cp -- "${public_files[@]}" _site/
+          cp -R -- assets/. _site/assets/
+          touch _site/.nojekyll
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v4
+        with:
+          path: _site
+
+      - name: Deploy Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

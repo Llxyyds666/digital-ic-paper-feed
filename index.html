@@ -1,0 +1,89 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="数字 IC 设计与验证顶刊顶会文献，DeepSeek 中文精选与累计 RSS 订阅。">
+  <title>数字 IC 文献订阅 · Digital IC Paper Feed</title>
+  <style>
+    :root { color-scheme: light; --ink:#182832; --muted:#54646f; --line:#dae2e7; --accent:#086b75; }
+    * { box-sizing:border-box; }
+    body { margin:0; background:#f8fafb; color:var(--ink); font-family:system-ui,-apple-system,"Segoe UI","Microsoft YaHei",sans-serif; line-height:1.65; }
+    main { max-width:900px; margin:0 auto; padding:64px 24px 40px; }
+    .eyebrow { margin:0 0 14px; color:var(--accent); font-size:13px; font-weight:650; letter-spacing:.12em; }
+    h1 { margin:0 0 16px; font-size:clamp(28px,5vw,42px); line-height:1.25; letter-spacing:-.03em; }
+    .intro { max-width:700px; margin:0 0 25px; color:var(--muted); font-size:17px; }
+    a { color:var(--accent); text-underline-offset:3px; }
+    a:hover { color:#044650; }
+    a:focus-visible { outline:3px solid #0c7d8b; outline-offset:5px; border-radius:3px; }
+    .actions { display:flex; flex-wrap:wrap; align-items:center; gap:14px 24px; margin:0 0 36px; }
+    .button { display:inline-block; background:var(--accent); color:white; padding:10px 18px; border-radius:6px; text-decoration:none; font-weight:650; }
+    .button:hover { background:#04525d; color:white; }
+    h2 { margin:34px 0 14px; font-size:20px; }
+    .feeds { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:14px; }
+    .feed { background:white; border:1px solid var(--line); border-radius:8px; padding:21px; }
+    .feed h3 { margin:0 0 8px; font-size:17px; }
+    .feed p { margin:0 0 14px; color:var(--muted); font-size:14px; }
+    .feed a { display:inline-block; font-weight:650; }
+    .raw { margin:17px 0 0; color:var(--muted); font-size:14px; }
+    .info { margin-top:30px; padding-top:8px; border-top:1px solid var(--line); }
+    .info p { margin:10px 0; color:var(--muted); font-size:14px; }
+    .venues { color:var(--ink); }
+    footer { margin-top:30px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px; }
+    @media (max-width:560px) { main { padding-top:36px; } .feeds { grid-template-columns:1fr; } .feed { padding:18px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <p class="eyebrow">DIGITAL IC PAPER FEED</p>
+      <h1>数字 IC 设计与验证<br>文献订阅</h1>
+      <p class="intro">从指定顶刊顶会中筛选数字硬件研究，提供中文摘要、设计与验证专题，以及适合深入阅读的每日推荐。</p>
+      <nav class="actions" aria-label="主要入口">
+        <a class="button" href="ai_summary.html">阅读中文精选</a>
+        <a href="https://github.com/Llxyyds666/digital-ic-paper-feed">查看来源与配置</a>
+      </nav>
+    </header>
+
+    <section aria-labelledby="rss-title">
+      <h2 id="rss-title">选择你的订阅</h2>
+      <div class="feeds">
+        <article class="feed">
+          <h3>综合精选</h3>
+          <p>全部数字 IC 分类的累计入选论文与中文摘要。</p>
+          <a href="ai_summary_feed.xml">综合精选 RSS</a>
+        </article>
+        <article class="feed">
+          <h3>设计与验证 · 合并专题</h3>
+          <p>一起关注数字设计和硬件验证，可用于单一订阅。</p>
+          <a href="design_verification_feed.xml">合并专题 RSS</a>
+        </article>
+        <article class="feed">
+          <h3>数字 IC 设计</h3>
+          <p>RTL、微架构、RISC-V、SoC、FPGA、综合、HLS、PPA 与时序。</p>
+          <a href="design_feed.xml">设计专题 RSS</a>
+        </article>
+        <article class="feed">
+          <h3>数字 IC 验证</h3>
+          <p>仿真、UVM、功能覆盖、形式验证、断言、等价检查、CDC/RDC 与 DFT。</p>
+          <a href="verification_feed.xml">验证专题 RSS</a>
+        </article>
+      </div>
+      <p class="raw">想查看来源与规则预筛结果？<a href="filtered_feed.xml">原始候选 RSS</a> 保留尚未经过 AI 精选的文献。</p>
+      <p class="raw">将所需 RSS 链接粘贴到 Zotero 的“新建订阅”。设计与验证专题可以交叉收录，同一份 RSS 内累计去重。</p>
+    </section>
+
+    <section class="info" aria-labelledby="scope-title">
+      <h2 id="scope-title">关注有证据的数字硬件研究</h2>
+      <p class="venues">期刊：TCAD、TVLSI、TODAES、IEEE TC、JSSC。会议：DAC、ICCAD、FMCAD、CAV、ISCA、MICRO、HPCA、ASPLOS、ISSCC、VLSI Symposium。</p>
+      <p>按出版来源元数据核验主会论文，再检查实际数字设计或验证贡献。JSSC、ISSCC 与 VLSI Symposium 的数字论文在范围内；纯模拟器件、材料、纯软件证明、辅助轨道、新闻及未确认来源的预印本不入选。</p>
+      <p>每 6 小时采集，每天北京时间 09:17 筛选最多 100 篇候选。入选数量取决于实际新增论文和筛选结果，历史摘要累计保存；首次数据库回溯最近 30 天。</p>
+      <p>缺少原始摘要时标记“仅据标题，缺少摘要”，保守判断并保留不确定性。每日推荐使用完整原始摘要；实际请求与 tokens 见 <a href="ai_usage.json">消耗记录</a>。</p>
+    </section>
+
+    <footer>
+      <p>Digital IC Paper Feed · <a href="https://github.com/Llxyyds666/digital-ic-paper-feed#配置与密钥">部署与密钥配置</a> · AI 精选在配置 DeepSeek 后生成。</p>
+    </footer>
+  </main>
+</body>
+</html>

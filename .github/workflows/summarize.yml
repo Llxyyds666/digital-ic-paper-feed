@@ -1,0 +1,142 @@
+name: Summarize digital IC literature
+
+on:
+  schedule:
+    - cron: '17 1 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: digital-ic-feed-${{ github.repository }}-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  summarize:
+    runs-on: ubuntu-latest
+    timeout-minutes: 180
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          ref: ${{ github.ref_name }}
+          fetch-depth: 0
+
+      - name: Check AI configuration
+        id: ai
+        shell: bash
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          BARK_TOKEN: ${{ secrets.BARK_TOKEN }}
+          BARK_SETTING: ${{ vars.BARK_ENABLED }}
+        run: |
+          if [[ -z "${DEEPSEEK_API_KEY}" ]]; then
+            echo "enabled=false" >> "${GITHUB_OUTPUT}"
+            echo "::notice::DEEPSEEK_API_KEY is not configured. Candidate collection remains active; AI screening is skipped."
+          else
+            echo "enabled=true" >> "${GITHUB_OUTPUT}"
+          fi
+          if [[ -n "${BARK_TOKEN}" && "${BARK_SETTING}" != "false" ]]; then
+            echo "bark=true" >> "${GITHUB_OUTPUT}"
+          else
+            echo "bark=false" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Set up Python
+        if: ${{ steps.ai.outputs.enabled == 'true' }}
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install project and test dependencies
+        if: ${{ steps.ai.outputs.enabled == 'true' }}
+        run: python -m pip install ".[dev]"
+
+      - name: Test before summarization
+        if: ${{ steps.ai.outputs.enabled == 'true' }}
+        run: python -m pytest -q
+
+      - name: Generate DeepSeek digest
+        id: summarize
+        if: ${{ steps.ai.outputs.enabled == 'true' }}
+        continue-on-error: true
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+          DEEPSEEK_MODEL: ${{ vars.DEEPSEEK_MODEL || 'deepseek-v4-flash-vision-exp' }}
+          SEMANTIC_SCHOLAR_API_KEY: ${{ secrets.SEMANTIC_SCHOLAR_API_KEY }}
+          IEEE_API_KEY: ${{ secrets.IEEE_API_KEY }}
+          BARK_ENABLED: ${{ secrets.BARK_TOKEN != '' && vars.BARK_ENABLED != 'false' }}
+        run: >-
+          python -m ic_feed.summarize
+          --config paper_feed_config.json
+          --state state.json
+          --notification-plan "${{ runner.temp }}/ic-notification.json"
+
+      - name: Validate generated publication
+        id: validate
+        if: ${{ always() && (steps.summarize.outcome == 'success' || steps.summarize.outcome == 'failure') }}
+        continue-on-error: true
+        run: python -m ic_feed.validate
+
+      - name: Commit and push summary outputs
+        id: publish
+        if: ${{ always() && steps.ai.outputs.enabled == 'true' && (steps.validate.outcome == 'success' || steps.validate.outcome == 'failure' || steps.summarize.outcome == 'failure') }}
+        shell: bash
+        env:
+          SUMMARY_OUTCOME: ${{ steps.summarize.outcome }}
+          PUBLICATION_OUTCOME: ${{ steps.validate.outcome }}
+        run: |
+          echo "ready=false" >> "${GITHUB_OUTPUT}"
+          successful_outputs=(
+            "filtered_feed.xml"
+            "ai_summary_feed.xml"
+            "ai_summary.html"
+            "design_verification_feed.xml"
+            "design_feed.xml"
+            "verification_feed.xml"
+            "ai_usage.json"
+            "state.json"
+          )
+          if [[ "${PUBLICATION_OUTCOME}" != "success" ]]; then
+            allowed_outputs=("ai_usage.json")
+          else
+            allowed_outputs=("${successful_outputs[@]}")
+          fi
+          existing_outputs=()
+          for output in "${allowed_outputs[@]}"; do
+            if [[ -e "${output}" ]] || git ls-files --error-unmatch -- "${output}" > /dev/null 2>&1; then
+              existing_outputs+=("${output}")
+            fi
+          done
+          if (( ${#existing_outputs[@]} > 0 )); then
+            git add -- "${existing_outputs[@]}"
+          fi
+          if git diff --cached --quiet; then
+            echo "No summary output changes to publish."
+            if [[ "${PUBLICATION_OUTCOME}" == "success" ]]; then
+              echo "ready=true" >> "${GITHUB_OUTPUT}"
+            fi
+            exit 0
+          fi
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git commit -m "data: update DeepSeek digital IC digest"
+          git pull --rebase --autostash origin "${GITHUB_REF_NAME}"
+          git push origin "HEAD:${GITHUB_REF_NAME}"
+          if [[ "${PUBLICATION_OUTCOME}" == "success" ]]; then
+            echo "ready=true" >> "${GITHUB_OUTPUT}"
+          fi
+
+      - name: Send Bark notifications
+        if: ${{ steps.summarize.outcome == 'success' && steps.validate.outcome == 'success' && steps.publish.outputs.ready == 'true' && steps.ai.outputs.bark == 'true' }}
+        continue-on-error: true
+        env:
+          BARK_TOKEN: ${{ secrets.BARK_TOKEN }}
+        run: >-
+          python -m ic_feed.notify
+          --plan "${{ runner.temp }}/ic-notification.json"
+
+      - name: Propagate summary failure
+        if: ${{ always() && (steps.summarize.outcome == 'failure' || steps.validate.outcome == 'failure') }}
+        run: exit 1

@@ -1,0 +1,29 @@
+{
+  "include_any": [
+    "verilog", "systemverilog", "vhdl", "cocotb", "verilator", "bluespec", "universal verification methodology",
+    "register transfer level", "register-transfer level", "hardware verification",
+    "digital integrated circuit", "digital ic", "logic synthesis", "high level synthesis",
+    "high-level synthesis", "clock domain crossing", "reset domain crossing",
+    "static timing analysis", "logic locking", "risc v", "risc-v", "fpga",
+    "rtl design", "rtl verification",
+    "digital circuit design", "digital vlsi", "physical design automation",
+    "global placement", "standard cell", "clock tree synthesis", "logic optimization", "technology mapping",
+    "sram", "dram", "digital compute in memory", "digital compute-in-memory", "digital in-memory computing"
+  ],
+  "context_required": [
+    "formal verification", "equivalence checking", "model checking", "assertion",
+    "testbench", "test bench", "coverage", "uvm", "rtl", "ppa", "dft",
+    "design for test", "scan chain", "scan compression", "place and route",
+    "floorplanning", "clock gating", "synthesis", "eda", "placement", "routing",
+    "microarchitecture", "microarchitectural", "hdl", "chisel", "floorplan", "timing closure", "cell sizing", "branch prediction", "memory controller", "accelerator", "accelerators", "compute in memory", "compute-in-memory", "in-memory computing"
+  ],
+  "material_context": [
+    "hardware", "digital", "logic", "circuit", "verilog", "systemverilog",
+    "vhdl", "fpga", "asic", "soc", "processor", "chip", "netlist", "vlsi",
+    "risc", "register", "gate level"
+  ],
+  "obvious_noise": [
+    "integrated care", "interstitial cystitis", "intracranial", "immune checkpoint",
+    "uvm spectrophotometry", "university of vermont medical", "isotope chromatography"
+  ]
+}
