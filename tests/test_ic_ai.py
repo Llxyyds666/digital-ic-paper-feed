@@ -38,6 +38,20 @@ def test_screening_prompt_targets_actual_digital_hardware_and_excludes_software_
     assert "diamond" not in prompt.lower()
 
 
+def test_neural_network_verification_accelerator_is_not_chip_verification_methodology():
+    prompt = _screening_messages([paper()], config())[0]["content"]
+    assert "neural-network robustness" in prompt
+    assert "digital-design, not digital-verification" in prompt
+
+
+def test_truncated_abstract_is_explicitly_marked_and_not_claimed_complete():
+    messages = _screening_messages([paper("a" * 1300)], config())
+    payload = json.loads(messages[1]["content"])["papers"][0]
+    assert payload["abstract_truncated"] is True
+    assert len(payload["abstract"]) == config().max_abstract_chars
+    assert "do not claim the full paper or abstract lacks" in messages[0]["content"]
+
+
 @pytest.mark.parametrize("topics", [["diamond-power-rf-detectors"], ["digital-design", "digital-design"], ["not-a-topic"]])
 def test_strict_topic_schema_retries_invalid_responses_and_rejects_legacy_labels(topics):
     record = paper()

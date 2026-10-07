@@ -48,6 +48,16 @@ def identity_aliases(record: PaperRecord) -> set[str]:
     figshare = re.fullmatch(r"10\.6084/m9\.figshare\.(\d+)(?:\.v\d+)?", doi)
     if figshare:
         aliases.add("figshare:" + figshare[1])
+    # Keep the publisher identity after an RSS item is promoted to a DOI key.
+    # Crossref may replace the preferred URL with doi.org, so inspect source_ids
+    # too. Never trust a document path on an unrelated host.
+    for value in [record.url, *record.source_ids]:
+        document_url = urlparse(value)
+        if document_url.hostname not in {"ieeexplore.ieee.org", "www.ieeexplore.ieee.org"}:
+            continue
+        document = re.fullmatch(r"/document/(\d+)/?", document_url.path)
+        if document:
+            aliases.add("ieee:" + document[1])
     return aliases
 
 
@@ -61,9 +71,18 @@ def group_records(records: list[PaperRecord]) -> dict[str, tuple[PaperRecord, li
             index = parents[index]
         return index
 
+    aliases_by_record = [identity_aliases(record) for record in records]
+    ieee_dois: dict[str, set[str]] = {}
+    for record, aliases in zip(records, aliases_by_record):
+        doi = normalize_doi(record.doi)
+        if doi:
+            for alias in aliases:
+                if alias.startswith("ieee:"):
+                    ieee_dois.setdefault(alias, set()).add(doi)
+    conflicted = {alias for alias, dois in ieee_dois.items() if len(dois) > 1}
     seen = {}
     for index, record in enumerate(records):
-        for alias in identity_aliases(record):
+        for alias in aliases_by_record[index] - conflicted:
             if alias in seen:
                 parents[root(index)] = root(seen[alias])
             seen[alias] = index

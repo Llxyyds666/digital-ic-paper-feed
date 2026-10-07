@@ -35,6 +35,6 @@
 
 - [x] Add initial empty state/feeds and a clear HTML landing page, README with source rationale, subscription URLs, secret setup and exact schedule.
 - [x] Add CI, six-hour collection, 09:17 Beijing daily summary and Pages deployment workflows. Missing DeepSeek key skips AI with explicit status.
-- [ ] Run full local pytest and generated-output validation, and actual no-AI collection.
-- [ ] Create the public repository, push reviewed files, enable Pages, dispatch CI/collection and verify published RSS and workflow conclusions.
+- [x] Run full local pytest and generated-output validation, and actual no-AI collection.
+- [x] Create the public repository, push reviewed files, enable Pages, dispatch CI/collection and verify published RSS and workflow conclusions.
 - [ ] Report actual live URLs and any credential-dependent work still waiting for user configuration.

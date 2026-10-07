@@ -7,7 +7,7 @@ from xml.etree import ElementTree as ET
 
 from ic_feed.config import AppConfig, load_config
 from ic_feed.focus import load_focus_overrides, render_focus_feeds
-from ic_feed.normalize import record_key
+from ic_feed.normalize import group_records, record_key
 from ic_feed.publication import cumulative_records, is_repository_artifact, load_withheld_aliases
 from ic_feed.render import render_rss
 from ic_feed.state import FeedState, load_state
@@ -36,6 +36,8 @@ def validate_publication(
     withheld_aliases: set[str],
     overrides: dict[str, frozenset[str]],
 ) -> dict[str, int]:
+    if len(group_records(list(state.papers.values()))) != len(state.papers):
+        raise ValueError("duplicate publisher identity in state")
     for key, record in state.papers.items():
         if record_key(record) != key:
             raise ValueError("state identity mismatch")

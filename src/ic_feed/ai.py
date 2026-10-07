@@ -293,6 +293,7 @@ def _screening_messages(records: Sequence[PaperRecord], config: AiConfig) -> lis
             "title": record.title,
             "abstract": record.abstract[: config.max_abstract_chars],
             "abstract_missing": abstract_missing(record.title, record.abstract),
+            "abstract_truncated": len(record.abstract) > config.max_abstract_chars,
             "authors": list(record.authors),
             "journal": record.journal,
             "published_at": record.published_at.isoformat(),
@@ -336,6 +337,9 @@ def _screening_messages(records: Sequence[PaperRecord], config: AiConfig) -> lis
                 "DFT/test and digital hardware security/reliability verification. Use both "
                 "only for explicit contributions to both: ordinary benchmarking of a design "
                 "does not establish a verification-methodology contribution. Assign the "
+                "topic by the research object, not the word verification: an ASIC accelerator "
+                "for neural-network robustness or software proofs is digital-design, not digital-verification; "
+                "digital-verification requires checking/testing digital hardware itself. "
                 "category by main contribution. Included records need at least one topic; "
                 "excluded records must use matched_topics [].\n"
                 "EXCLUDE pure software formal verification/program analysis without "
@@ -357,7 +361,10 @@ def _screening_messages(records: Sequence[PaperRecord], config: AiConfig) -> lis
                 "quality score. For excluded papers use category eda-methodology and []. "
                 "For included records summary_zh must use two concise evidence-grounded "
                 "Chinese sentences about design/method and reported results; preserve a key "
-                "number or limitation if given. Distinguish proposals, simulation, FPGA and "
+                "number or limitation if given. If abstract_truncated is true, do not claim the full paper or abstract lacks "
+                "measurements/results just because they are absent from this excerpt; state "
+                "给定摘要片段未披露 only when that limitation is useful. "
+                "Distinguish proposals, simulation, FPGA and "
                 "silicon measurements; never turn planned work into completed experiments. "
                 "Never return relevant=true when the reason says unrelated to digital IC. "
                 'Example: {"decisions":[{"key":"<input key>","relevant":false,'

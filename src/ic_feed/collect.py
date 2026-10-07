@@ -80,7 +80,10 @@ class ScholarlyHarvest:
 def merge_into_state(state: FeedState, incoming: Iterable[PaperRecord], rules: QueryRules) -> CollectionStats:
     """Filter and merge records while preserving the oldest-first AI work queue."""
     added = merged = filtered = 0
-    explicit_requeue = set(state.pending_ai)
+    original_keys = set(state.papers)
+    explicit_requeue = {
+        key for key in state.pending_ai if state.papers[key].ai_relevant is not None
+    }
     for record in incoming:
         if is_repository_artifact(record) or match_venue(record) is None or not matches_rules(record, rules):
             filtered += 1
@@ -119,7 +122,8 @@ def merge_into_state(state: FeedState, incoming: Iterable[PaperRecord], rules: Q
             new_pending.append(key)
     state.papers = {key: record for key, (record, _) in groups.items()}
     state.pending_ai = sorted(new_pending, key=lambda key: (state.papers[key].published_at, key))
-    return CollectionStats(added=added, merged=merged, filtered=filtered)
+    new_works = sum(not original_keys.intersection(aliases) for _, aliases in groups.values())
+    return CollectionStats(added=new_works, merged=added + merged - new_works, filtered=filtered)
 
 
 def _read_sources(path: Path) -> list[dict[str, str]]:

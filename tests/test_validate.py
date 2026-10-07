@@ -98,3 +98,15 @@ def test_validator_rejects_tampered_chinese_summary(tmp_path):
     path.write_text(ET.tostring(root, encoding="unicode"), encoding="utf-8")
     with pytest.raises(ValueError, match="summary"):
         validate_publication(tmp_path, state, config, set(), {})
+
+
+def test_validator_rejects_duplicate_publisher_identity_despite_distinct_guids(tmp_path):
+    from ic_feed.validate import validate_publication
+    config, state = publication(tmp_path)
+    key = next(iter(state.papers))
+    state.papers[key].source_ids = ["https://ieeexplore.ieee.org/document/123456"]
+    duplicate = replace(state.papers[key], doi=None,
+                        url="http://ieeexplore.ieee.org/document/123456")
+    state.papers[record_key(duplicate)] = duplicate
+    with pytest.raises(ValueError, match="duplicate publisher identity"):
+        validate_publication(tmp_path, state, config, set(), {})
