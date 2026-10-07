@@ -157,6 +157,50 @@ def test_crossref_fixture_strips_tags_uses_online_date_and_print_fallback():
     assert records[0].doi == "10.1000/diamond.1"
 
 
+@pytest.mark.parametrize("parser", [crossref.parse_response, crossref.parse_page])
+@pytest.mark.parametrize(
+    ("title", "expected"),
+    [
+        (
+            "AGS:\n                    <u>A</u>\n                    ccelerating 3D\n                    <u>G</u>\n                    aussian Splatting\n                    <u>S</u>\n                    LAM via CODEC-Assisted Frame Covisibility Detection",
+            "AGS: Accelerating 3D Gaussian Splatting SLAM via CODEC-Assisted Frame Covisibility Detection",
+        ),
+        (
+            "MoDM: Efficient Serving for Image Generation via\n <u>M</u>\n ixture-\n <u>o</u>\n f-\n <u>D</u>\n iffusion\n <u>M</u>\n odels",
+            "MoDM: Efficient Serving for Image Generation via Mixture-of-Diffusion Models",
+        ),
+        ("<scp>Bat:</scp>\n Efficient Serving", "Bat: Efficient Serving"),
+        ("C\n <scp>xlalloc</scp>\n : Safe Memory", "Cxlalloc: Safe Memory"),
+        ("M\n <sup>2</sup>\n XFP: Efficient Quantization", "M2XFP: Efficient Quantization"),
+        ("An N\n <sup>2</sup>\n Algorithm", "An N2 Algorithm"),
+        ("An N\n <sub>2</sub>\n Algorithm", "An N2 Algorithm"),
+        ("T\n <scp>EE</scp>\n M³: Trusted Execution", "TEEM³: Trusted Execution"),
+        ("Z\n <scp>ip</scp>\n S\n <scp>erv</scp>\n : Fast Inference", "ZipServ: Fast Inference"),
+        ("<i>SpeContext:</i>\n Efficient Reasoning", "SpeContext: Efficient Reasoning"),
+        ("Efficient yet\n <u>R</u>\n eliable AI Sys\n <u>te</u>\n ms", "Efficient yet Reliable AI Systems"),
+        ("Resource Efficient A\n <u>t</u>\n tention", "Resource Efficient Attention"),
+        ("<italic>Fast</italic> &amp; <b>Safe</b> Hardware", "Fast & Safe Hardware"),
+        ("Model\n Checking with x < y and y > z", "Model Checking with x < y and y > z"),
+        (r"A literal \n command and x &lt; y", r"A literal \n command and x < y"),
+        ("An <em>inline</em> word with normal spaces", "An inline word with normal spaces"),
+        ("A\n <u>New</u>\n Architecture", "A New Architecture"),
+        ("&lt;u&gt;A&lt;/u&gt;ccelerating", "Accelerating"),
+        ("An <u>AI</u>\n Accelerator", "An AI Accelerator"),
+        ("The <scp>CPU</scp>\n Architecture", "The CPU Architecture"),
+        ("Efficient\n <u>the</u>\n system", "Efficient the system"),
+        ("Hardware\n <u>P</u>\n re\n <u>f</u>\n etching", "Hardware Prefetching"),
+    ],
+)
+def test_crossref_titles_clean_inline_markup_without_splitting_words(parser, title, expected):
+    payload = json.loads((FIXTURES / "crossref.json").read_bytes())
+    payload["message"]["items"][0]["title"] = [title]
+
+    result = parser(json.dumps(payload).encode())
+    records = result.records if parser is crossref.parse_page else result
+
+    assert records[0].title == expected
+
+
 @pytest.mark.parametrize("work_type", ["dataset", "component", "peer-review"])
 def test_crossref_excludes_nonpaper_work_types(work_type):
     payload = json.loads((FIXTURES / "crossref.json").read_bytes())

@@ -14,6 +14,13 @@ _BASE_URL = "https://api.crossref.org/works"
 _SELECT = "DOI,title,type,abstract,author,container-title,published-online,published-print,URL"
 _MAX_PAGE_SIZE = 1000
 _TAGS = re.compile(r"<[^>]+>")
+_TITLE_TAG_NAMES = r"u|scp|sup|sub|i|italic|em|b|bold|strong"
+_TITLE_TAGS = re.compile(rf"</?(?:{_TITLE_TAG_NAMES})(?:\s[^<>]*)?>", re.IGNORECASE)
+_TITLE_INLINE_ELEMENTS = re.compile(
+    rf"(?P<before>[ \t]*[\r\n]+[ \t]*)?<(?P<tag>{_TITLE_TAG_NAMES})(?:\s[^<>]*)?>"
+    r"(?P<text>[^<>]*)</(?P=tag)\s*>(?P<after>[ \t]*[\r\n]+[ \t]*)?",
+    re.IGNORECASE,
+)
 _PAPER_TYPES = frozenset(
     {
         "book-chapter",
@@ -51,6 +58,47 @@ def build_url(query: str, from_date: date, rows: int, cursor: str = "*") -> str:
 
 def _strip_tags(value: object) -> str:
     return " ".join(_TAGS.sub(" ", unescape(str(value or ""))).split())
+
+
+def _clean_title(value: object) -> str:
+    """Remove inline emphasis without turning ACM's indented initials into words."""
+    title = unescape(str(value or ""))
+
+    def inline_text(match: re.Match[str]) -> str:
+        tag = match["tag"].lower()
+        text = match["text"]
+        before, after = match["before"] or "", match["after"] or ""
+        prefix = re.search(r"(\S+)$", title[:match.start()])
+        previous = prefix[0] if prefix else ""
+        prior_initial = prefix is not None and re.search(
+            r"<u>[A-Z]</u>[ \t]*[\r\n]+[ \t]*$", title[:prefix.start()]
+        ) is not None
+        # Only layout newlines next to a marked word fragment are joined;
+        # ordinary spaces and unmarked line breaks remain word boundaries.
+        marked_prefix = tag in {"scp", "sup", "sub"} and bool(re.fullmatch(r"[A-Z]", previous))
+        underlined_suffix = (
+            tag == "u" and len(text) <= 2 and text[:1].islower()
+            and len(previous) <= 3 and (previous[:1].isupper() or prior_initial)
+        )
+        if before and (marked_prefix or underlined_suffix or (tag == "u" and previous.endswith("-"))):
+            before = ""
+        following = title[match.end():match.end() + 1]
+        next_word = re.match(r"[^\W_]+", title[match.end():])
+        fragment = (
+            (tag == "u" and (len(text) == 1 or (len(text) <= 2 and not text.isupper()))
+             and (following.islower() or (next_word is not None and next_word[0].isupper())))
+            or (tag == "scp" and marked_prefix)
+            or (tag in {"sup", "sub"} and marked_prefix and next_word is not None
+                and (next_word[0].isupper() or next_word[0].isdigit()))
+        )
+        if after and text[-1:].isalnum() and (
+            (fragment and following.isalnum()) or following in {":", ",", ".", ";", ")"}
+        ):
+            after = ""
+        return before + text + after
+
+    title = _TITLE_INLINE_ELEMENTS.sub(inline_text, title)
+    return " ".join(_TITLE_TAGS.sub("", title).split())
 
 
 def _publication_date(item: dict[str, object]) -> datetime:
@@ -107,7 +155,7 @@ def parse_response(body: bytes) -> list[PaperRecord]:
             if item.get("type") not in _PAPER_TYPES:
                 continue
             titles = item.get("title")
-            title = str(titles[0]).strip() if isinstance(titles, list) and titles else ""
+            title = _clean_title(titles[0]) if isinstance(titles, list) and titles else ""
             doi = normalize_doi(item.get("DOI") if isinstance(item.get("DOI"), str) else None)
             if not title or not doi:
                 continue
