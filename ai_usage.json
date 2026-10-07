@@ -1,1 +1,13 @@
-[]
+[
+  {
+    "date": "2026-10-07",
+    "candidates": 74,
+    "processed": 74,
+    "selected": 61,
+    "requests": 10,
+    "prompt_tokens": 78267,
+    "completion_tokens": 12633,
+    "total_tokens": 90900,
+    "token_usage_complete": true
+  }
+]
