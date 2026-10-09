@@ -1,12 +1,2 @@
 timestamp	category	url	detail
-2026-10-08T23:18:32.252726+00:00	http	ieee:journal:0278-0070	ieee status=418
-2026-10-08T23:18:32.375817+00:00	http	ieee:journal:1063-8210	ieee status=418
-2026-10-08T23:18:32.513104+00:00	http	ieee:journal:0018-9340	ieee status=418
-2026-10-08T23:18:32.611395+00:00	http	ieee:journal:0018-9200	ieee status=418
-2026-10-08T23:18:32.841848+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
-2026-10-08T23:18:34.099299+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
-2026-10-08T23:18:35.877870+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
-2026-10-08T23:18:37.164453+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
-2026-10-08T23:18:37.285267+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
-2026-10-08T23:18:39.090431+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
-2026-10-08T23:18:39.299955+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
+2026-10-09T06:03:52.534934+00:00	http_403	https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=todaes	HTTP 403
