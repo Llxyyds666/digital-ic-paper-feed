@@ -1,12 +1,12 @@
 timestamp	category	url	detail
-2026-10-15T11:22:46.185825+00:00	http	ieee:journal:0278-0070	ieee status=418
-2026-10-15T11:22:46.321783+00:00	http	ieee:journal:1063-8210	ieee status=418
-2026-10-15T11:22:46.423315+00:00	http	ieee:journal:0018-9340	ieee status=418
-2026-10-15T11:22:46.489014+00:00	http	ieee:journal:0018-9200	ieee status=418
-2026-10-15T11:22:46.802706+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=403
-2026-10-15T11:22:47.116043+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
-2026-10-15T11:22:49.306104+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
-2026-10-15T11:22:50.734334+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
-2026-10-15T11:22:50.786259+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
-2026-10-15T11:22:51.440928+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
-2026-10-15T11:22:51.499176+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
+2026-10-15T16:56:48.139872+00:00	http	ieee:journal:0278-0070	ieee status=418
+2026-10-15T16:56:48.530874+00:00	http	ieee:journal:1063-8210	ieee status=418
+2026-10-15T16:56:48.910398+00:00	http	ieee:journal:0018-9340	ieee status=418
+2026-10-15T16:56:49.275349+00:00	http	ieee:journal:0018-9200	ieee status=418
+2026-10-15T16:56:49.927413+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
+2026-10-15T16:56:51.809036+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
+2026-10-15T16:56:55.008281+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
+2026-10-15T16:56:55.775146+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
+2026-10-15T16:56:56.115620+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
+2026-10-15T16:56:59.113792+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
+2026-10-15T16:56:59.429607+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
