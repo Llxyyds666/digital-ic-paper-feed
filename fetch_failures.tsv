@@ -1,2 +1,13 @@
 timestamp	category	url	detail
-2026-10-24T10:53:08.461880+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-10-24T15:53:40.470085+00:00	http	ieee:journal:0278-0070	ieee status=418
+2026-10-24T15:53:40.576756+00:00	http	ieee:journal:1063-8210	ieee status=418
+2026-10-24T15:53:40.670484+00:00	http	ieee:journal:0018-9340	ieee status=418
+2026-10-24T15:53:40.795299+00:00	http	ieee:journal:0018-9200	ieee status=418
+2026-10-24T15:53:41.276646+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
+2026-10-24T15:53:42.568383+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
+2026-10-24T15:53:47.288827+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-10-24T15:53:47.367903+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
+2026-10-24T15:53:47.563592+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
+2026-10-24T15:53:47.619046+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
+2026-10-24T15:53:51.584663+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
+2026-10-24T15:53:51.648825+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
