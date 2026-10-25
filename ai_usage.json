@@ -122,13 +122,13 @@
   },
   {
     "date": "2026-10-25",
-    "candidates": 80,
-    "processed": 70,
-    "selected": 45,
-    "requests": 10,
-    "prompt_tokens": 47483,
-    "completion_tokens": 10598,
-    "total_tokens": 58081,
+    "candidates": 100,
+    "processed": 90,
+    "selected": 56,
+    "requests": 14,
+    "prompt_tokens": 63816,
+    "completion_tokens": 13316,
+    "total_tokens": 77132,
     "token_usage_complete": true
   }
 ]
