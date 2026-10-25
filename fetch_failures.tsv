@@ -1,13 +1,13 @@
 timestamp	category	url	detail
-2026-10-24T20:44:06.882580+00:00	http	ieee:journal:0278-0070	ieee status=418
-2026-10-24T20:44:07.053309+00:00	http	ieee:journal:1063-8210	ieee status=418
-2026-10-24T20:44:07.172079+00:00	http	ieee:journal:0018-9340	ieee status=418
-2026-10-24T20:44:07.289547+00:00	http	ieee:journal:0018-9200	ieee status=418
-2026-10-24T20:44:07.627616+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
-2026-10-24T20:44:09.116391+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
-2026-10-24T20:44:14.075131+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
-2026-10-24T20:44:14.247462+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
-2026-10-24T20:44:14.565832+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
-2026-10-24T20:44:14.692269+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
-2026-10-24T20:44:16.759578+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
-2026-10-24T20:44:16.879620+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
+2026-10-25T04:36:00.555067+00:00	http	ieee:journal:0278-0070	ieee status=418
+2026-10-25T04:36:00.700720+00:00	http	ieee:journal:1063-8210	ieee status=418
+2026-10-25T04:36:00.891360+00:00	http	ieee:journal:0018-9340	ieee status=418
+2026-10-25T04:36:01.143863+00:00	http	ieee:journal:0018-9200	ieee status=418
+2026-10-25T04:36:01.951384+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
+2026-10-25T04:36:02.601245+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
+2026-10-25T04:36:08.848832+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-10-25T04:36:09.004252+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
+2026-10-25T04:36:10.710069+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
+2026-10-25T04:36:10.827512+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
+2026-10-25T04:36:12.691624+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
+2026-10-25T04:36:12.838244+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
