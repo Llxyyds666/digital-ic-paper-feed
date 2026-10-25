@@ -14,7 +14,7 @@ import sys
 from typing import Protocol, Sequence
 from urllib.parse import urlsplit
 
-from ic_feed.ai import CATEGORIES, DeepSeekClient, RequestCounter, screen_batch
+from ic_feed.ai import CATEGORIES, DeepSeekClient, InvalidModelResponse, RequestCounter, screen_batch
 from ic_feed.atomic import (
     StagedFile,
     commit_staged,
@@ -506,6 +506,52 @@ def _pending_groups_and_candidates(
     return pending_groups, keys
 
 
+def _screen_candidate_groups(
+    candidate_keys: list[str],
+    pending_groups: dict[str, tuple[PaperRecord, list[str]]],
+    client: JsonClient,
+    config: AppConfig,
+    counter: RequestCounter,
+) -> tuple[list[AiDecision], set[str], bool]:
+    """Recover schema-invalid batches without accepting partial model responses."""
+    decisions: list[AiDecision] = []
+    attempted_keys: set[str] = set()
+    unresolved = False
+
+    def screen(keys: list[str]) -> bool:
+        nonlocal unresolved
+        before = counter.used
+        failure = None
+        try:
+            batch = screen_batch([pending_groups[key][0] for key in keys], client, config.ai, counter)
+        except (RuntimeError, ValueError) as error:
+            failure = error
+        finally:
+            if counter.used > before:
+                attempted_keys.update(keys)
+        if failure is not None:
+            invalid = isinstance(failure, InvalidModelResponse) or (
+                type(failure) is ValueError and str(failure) == "invalid model response"
+            )
+            if invalid and len(keys) > 1:
+                print(f"AI screening split batch_size={len(keys)}: {failure}", file=sys.stderr)
+                middle = len(keys) // 2
+                return screen(keys[:middle]) and screen(keys[middle:])
+            print(f"AI screening failed safely batch_size={len(keys)}: {failure}", file=sys.stderr)
+            unresolved = True
+            # A bad leaf stays pending, while valid siblings can still proceed.
+            # Authentication and transport failures stop the entire run.
+            return invalid
+        by_key = {decision.key: decision for decision in batch}
+        decisions.extend(by_key[key] for key in keys)
+        return True
+
+    for offset in range(0, len(candidate_keys), config.ai.batch_size):
+        if not screen(candidate_keys[offset:offset + config.ai.batch_size]):
+            break
+    return decisions, attempted_keys, unresolved
+
+
 def run_summary(
     config: AppConfig,
     state_path: Path,
@@ -625,28 +671,14 @@ def run_summary(
 
     counter = RequestCounter()
     token_before = _client_token_totals(client)
-    decisions: list[AiDecision] = []
-    screening_failed = False
-    for offset in range(0, len(candidate_keys), config.ai.batch_size):
-        keys = candidate_keys[offset : offset + config.ai.batch_size]
-        try:
-            batch = screen_batch(
-                [pending_groups[key][0] for key in keys],
-                client,
-                config.ai,
-                counter,
-            )
-        except (RuntimeError, ValueError) as error:
-            print(f"AI screening failed safely: {error}", file=sys.stderr)
-            screening_failed = True
-            break
-        by_key = {decision.key: decision for decision in batch}
-        decisions.extend(by_key[key] for key in keys)
+    decisions, attempted_keys, screening_failed = _screen_candidate_groups(
+        candidate_keys, pending_groups, client, config, counter,
+    )
 
     token_after_screening = _client_token_totals(client)
     if not decisions:
         stats = _summary_stats(
-            candidates=len(candidate_keys),
+            candidates=len(attempted_keys),
             processed=0,
             selected=0,
             requests=counter.used,
@@ -715,7 +747,7 @@ def run_summary(
 
     token_after = _client_token_totals(client)
     stats = _summary_stats(
-        candidates=len(candidate_keys),
+        candidates=len(attempted_keys),
         processed=len(decisions),
         selected=len(selected),
         requests=counter.used,
@@ -821,7 +853,7 @@ def main(argv: list[str] | None = None, *, now: datetime | None = None) -> int:
         notification_plan_path=args.notification_plan,
     )
     print(
-        f"processed={stats.processed} selected={stats.selected} "
+        f"candidates={stats.candidates} processed={stats.processed} selected={stats.selected} "
         f"requests={stats.requests} remaining={stats.remaining}"
     )
     return 0 if not stats.failed else 1
