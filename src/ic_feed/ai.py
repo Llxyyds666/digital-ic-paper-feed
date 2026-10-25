@@ -89,15 +89,27 @@ class RequestBudget(RequestCounter):
             self._used += 1
 
 
-class _ModelResponseError(ValueError):
-    pass
+class InvalidModelResponse(ValueError):
+    """A schema failure with a fixed diagnostic, never model-provided text."""
+
+    CODES = frozenset({
+        "json_syntax", "json_duplicate_key", "api_envelope", "response_envelope",
+        "decision_fields", "decision_types", "confidence", "category", "topics",
+        "contradictory_scope", "missing_key", "duplicate_key", "foreign_key",
+    })
+
+    def __init__(self, code: str):
+        if type(code) is not str or code not in self.CODES:
+            raise ValueError("unknown model response diagnostic code")
+        self.code = code
+        super().__init__(f"invalid model response: {code}")
 
 
 def _duplicate_safe_object(pairs: list[tuple[str, object]]) -> dict[str, object]:
     result: dict[str, object] = {}
     for name, value in pairs:
         if name in result:
-            raise _ModelResponseError
+            raise InvalidModelResponse("json_duplicate_key")
         result[name] = value
     return result
 
@@ -105,28 +117,30 @@ def _duplicate_safe_object(pairs: list[tuple[str, object]]) -> dict[str, object]
 def _decode_model_json(content: str) -> list[object] | dict[str, object]:
     try:
         decoded = json.loads(content, object_pairs_hook=_duplicate_safe_object)
-    except (TypeError, ValueError, json.JSONDecodeError) as error:
-        raise _ModelResponseError from error
+    except InvalidModelResponse:
+        raise
+    except (TypeError, ValueError):
+        raise InvalidModelResponse("json_syntax") from None
     if type(decoded) not in (list, dict):
-        raise _ModelResponseError
+        raise InvalidModelResponse("response_envelope")
     return decoded
 
 
 def _extract_model_json(response: object) -> list[object] | dict[str, object]:
     if type(response) is not dict:
-        raise _ModelResponseError
+        raise InvalidModelResponse("api_envelope")
     choices = response.get("choices")
     if type(choices) is not list or not choices:
-        raise _ModelResponseError
+        raise InvalidModelResponse("api_envelope")
     first = choices[0]
     if type(first) is not dict:
-        raise _ModelResponseError
+        raise InvalidModelResponse("api_envelope")
     message = first.get("message")
     if type(message) is not dict:
-        raise _ModelResponseError
+        raise InvalidModelResponse("api_envelope")
     content = message.get("content")
     if type(content) is not str:
-        raise _ModelResponseError
+        raise InvalidModelResponse("api_envelope")
     return _decode_model_json(content)
 
 
@@ -158,7 +172,7 @@ def _retryable(error: Exception) -> bool:
         return retryable_http_status(status)
     return isinstance(
         error,
-        (_ModelResponseError, TimeoutError, ConnectionError, URLError),
+        (InvalidModelResponse, TimeoutError, ConnectionError, URLError),
     )
 
 
@@ -219,8 +233,8 @@ class DeepSeekClient:
                 raise HTTPError(url, status, "", None, None)
             try:
                 return json.loads(response.read().decode("utf-8"))
-            except (UnicodeDecodeError, json.JSONDecodeError) as error:
-                raise _ModelResponseError from error
+            except (UnicodeDecodeError, json.JSONDecodeError):
+                raise InvalidModelResponse("json_syntax") from None
 
     def complete_json(
         self,
@@ -280,8 +294,8 @@ class DeepSeekClient:
             )
         except _RequestBudgetExhausted:
             raise
-        except _ModelResponseError:
-            raise ValueError("invalid model response") from None
+        except InvalidModelResponse as error:
+            raise InvalidModelResponse(error.code) from None
         except Exception as error:
             raise _safe_request_error(error, attempt) from None
 
@@ -382,7 +396,7 @@ def _is_string_list(value: object) -> bool:
 
 def _validated_decision(value: object) -> AiDecision:
     if type(value) is not dict or set(value) != DECISION_FIELDS:
-        raise _ModelResponseError
+        raise InvalidModelResponse("decision_fields")
     key = value["key"]
     relevant = value["relevant"]
     confidence = value["confidence"]
@@ -391,26 +405,28 @@ def _validated_decision(value: object) -> AiDecision:
     summary_zh = value["summary_zh"]
     reason = value["reason"]
     if type(key) is not str or type(relevant) is not bool:
-        raise _ModelResponseError
+        raise InvalidModelResponse("decision_types")
     if type(confidence) not in (int, float) or not math.isfinite(confidence) or not 0 <= confidence <= 1:
-        raise _ModelResponseError
+        raise InvalidModelResponse("confidence")
     if type(category) is not str or category not in CATEGORIES:
-        raise _ModelResponseError
-    if not _is_string_list(matched_topics) or type(summary_zh) is not str or type(reason) is not str:
-        raise _ModelResponseError
+        raise InvalidModelResponse("category")
+    if type(summary_zh) is not str or type(reason) is not str:
+        raise InvalidModelResponse("decision_types")
+    if not _is_string_list(matched_topics):
+        raise InvalidModelResponse("topics")
     if (
         len(matched_topics) != len(set(matched_topics))
         or not set(matched_topics) <= FOCUS_LABELS
         or (not relevant and matched_topics)
         or (relevant and not matched_topics)
     ):
-        raise _ModelResponseError
+        raise InvalidModelResponse("topics")
     if relevant and any(phrase in reason + " " + summary_zh for phrase in (
         "与数字IC无关", "与数字 IC 无关", "不涉及数字电路",
         "unrelated to digital IC", "no digital hardware contribution",
     )):
         # A narrow consistency guard, not a substitute for semantic evaluation.
-        raise _ModelResponseError
+        raise InvalidModelResponse("contradictory_scope")
     return AiDecision(
         key=key,
         relevant=relevant,
@@ -427,17 +443,18 @@ def _validated_screening_response(
 ) -> list[AiDecision]:
     if type(raw) is dict:
         if set(raw) != {"decisions"} or type(raw["decisions"]) is not list:
-            raise ValueError("invalid model response")
+            raise InvalidModelResponse("response_envelope")
         raw = raw["decisions"]
     if type(raw) is not list:
-        raise ValueError("invalid model response")
-    try:
-        decisions = [_validated_decision(item) for item in raw]
-    except _ModelResponseError:
-        raise ValueError("invalid model response") from None
+        raise InvalidModelResponse("response_envelope")
+    decisions = [_validated_decision(item) for item in raw]
     returned_keys = [decision.key for decision in decisions]
-    if len(returned_keys) != len(set(returned_keys)) or set(returned_keys) != set(requested_keys):
-        raise ValueError("invalid model response")
+    if len(returned_keys) != len(set(returned_keys)):
+        raise InvalidModelResponse("duplicate_key")
+    if set(returned_keys) - set(requested_keys):
+        raise InvalidModelResponse("foreign_key")
+    if set(requested_keys) - set(returned_keys):
+        raise InvalidModelResponse("missing_key")
     return decisions
 
 
@@ -480,7 +497,7 @@ def screen_batch(
                 for decision in decisions
             ]
         except ValueError as error:
-            if str(error) != "invalid model response":
+            if not isinstance(error, InvalidModelResponse) and str(error) != "invalid model response":
                 raise
             if attempt == DEFAULT_RETRY_POLICY.attempts - 1:
                 raise
