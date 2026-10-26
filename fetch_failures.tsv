@@ -1,3 +1,2 @@
 timestamp	category	url	detail
-2026-10-25T20:47:08.322654+00:00	http_403	https://dl.acm.org/action/showFeed?type=etoc&feed=rss&jc=todaes	HTTP 403
-2026-10-25T20:47:17.681279+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-10-26T04:41:12.270790+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
