@@ -21,6 +21,8 @@ from ic_feed.retry import (
 
 BARK_URL = "https://api.day.app/push"
 BARK_GROUP = "digital-ic-paper-feed"
+BARK_REPORT_GROUP = f"{BARK_GROUP}-reports"
+BARK_RECOMMENDATION_GROUP = f"{BARK_GROUP}-recommendations"
 BARK_ICON_URL = (
     "https://llxyyds666.github.io/digital-ic-paper-feed/"
     "assets/ic-bark-icon.png"
@@ -114,18 +116,24 @@ def send_plan(
     sender = transport or _urllib_transport
     results: list[bool] = []
     for index, message in enumerate(plan.messages, start=1):
+        role = "report" if index == 1 else "recommendation"
         payload = {
             "device_key": token,
             "title": message.title,
             "body": message.body,
-            "group": BARK_GROUP,
+            "group": BARK_REPORT_GROUP if index == 1 else BARK_RECOMMENDATION_GROUP,
+            "isArchive": "1",
             "icon": BARK_ICON_URL,
         }
         if message.url is not None:
             payload["url"] = message.url
         body = json.dumps(payload, ensure_ascii=False).encode("utf-8")
 
-        def operation() -> None:
+        attempts = 0
+
+        def operation() -> int:
+            nonlocal attempts
+            attempts += 1
             response = sender(
                 BARK_URL,
                 {"Content-Type": "application/json"},
@@ -133,6 +141,7 @@ def send_plan(
                 timeout_seconds,
             )
             _validate_response(response)
+            return response.status
 
         def should_retry(error: Exception) -> bool:
             if isinstance(error, BarkProtocolError):
@@ -142,7 +151,7 @@ def send_plan(
             return isinstance(error, (TimeoutError, ConnectionError, URLError))
 
         try:
-            call_with_retry(
+            accepted_status = call_with_retry(
                 operation,
                 should_retry,
                 policy=policy,
@@ -160,5 +169,9 @@ def send_plan(
             )
             results.append(False)
         else:
+            print(
+                f"Bark notification {index} accepted: role={role} "
+                f"attempts={attempts} status={accepted_status} code=200"
+            )
             results.append(True)
     return tuple(results)

@@ -58,7 +58,8 @@ def test_bark_uses_official_json_endpoint_and_keeps_token_out_of_url():
             "device_key": "bark-secret",
             "title": plan().messages[index].title,
             "body": plan().messages[index].body,
-            "group": "digital-ic-paper-feed",
+            "group": "digital-ic-paper-feed-reports" if index == 0 else "digital-ic-paper-feed-recommendations",
+            "isArchive": "1",
             "icon": BARK_ICON_URL,
             "url": plan().messages[index].url,
         }
@@ -67,6 +68,31 @@ def test_bark_uses_official_json_endpoint_and_keeps_token_out_of_url():
             "assets/ic-bark-icon.png"
         )
         assert timeout == 10.0
+
+
+def test_single_report_replay_uses_report_group_and_forced_history():
+    report = NotificationPlan((plan().messages[0],))
+    transport = BarkTransport([success_response()])
+    assert send_plan("bark-secret", report, transport=transport) == (True,)
+    payload = json.loads(transport.calls[0][2])
+    assert payload["group"] == "digital-ic-paper-feed-reports"
+    assert payload["isArchive"] == "1"
+    assert "id" not in payload
+
+
+def test_service_acceptance_receipts_identify_roles_and_attempts_without_raw_data(capsys):
+    transport = BarkTransport([
+        BarkResponse(503, b'bark-secret upstream response'),
+        BarkResponse(200, b'{"code":200,"message":"bark-secret upstream response"}'),
+        success_response(),
+    ])
+    assert send_plan("bark-secret", plan(), transport=transport, wait=lambda _: None) == (True, True)
+    output = capsys.readouterr()
+    assert "Bark notification 1 accepted: role=report attempts=2 status=200 code=200" in output.out
+    assert "Bark notification 2 accepted: role=recommendation attempts=1 status=200 code=200" in output.out
+    assert "bark-secret" not in output.out + output.err
+    assert "upstream response" not in output.out + output.err
+    assert "delivered" not in output.out.lower()
 
 
 def test_bark_omits_url_when_message_has_none_and_propagates_timeout():
@@ -266,7 +292,7 @@ def test_default_transport_rejects_redirect_without_contacting_target(
 
 
 def test_notify_cli_reads_secret_from_environment_and_delivery_failure_is_nonfatal(
-    tmp_path, monkeypatch
+    tmp_path, monkeypatch, capsys
 ):
     path = tmp_path / "notification.json"
     write_notification_plan(path, plan())
@@ -281,6 +307,9 @@ def test_notify_cli_reads_secret_from_environment_and_delivery_failure_is_nonfat
 
     assert notify.main(["--plan", str(path)]) == 0
     assert seen == {"token": "bark-secret", "loaded": plan()}
+    output = capsys.readouterr()
+    assert "Bark delivery summary: accepted=0 failed=2 total=2" in output.out
+    assert "bark-secret" not in output.out + output.err
 
 
 def test_notify_cli_passes_configured_timeout(tmp_path, monkeypatch):

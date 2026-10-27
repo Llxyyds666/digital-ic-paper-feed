@@ -79,6 +79,34 @@ def _validated_plan(raw: object) -> NotificationPlan:
     return NotificationPlan(tuple(parsed))
 
 
+def build_statistics_message(
+    *,
+    candidates: int,
+    processed: int,
+    selected: int,
+    focus_selected: int,
+    base_url: str,
+) -> NotificationMessage:
+    """Build the same statistics report for normal publication and dated replay."""
+    counts = (candidates, processed, selected, focus_selected)
+    if any(type(value) is not int or value < 0 for value in counts):
+        raise ValueError("invalid notification plan")
+    summary_url = f"{base_url.rstrip('/')}/ai_summary.html"
+    if not _is_http_url(summary_url):
+        raise ValueError("invalid notification plan")
+
+    return NotificationMessage(
+        "数字 IC 文献日报",
+        (
+            f"今日候选：{candidates} 篇\n"
+            f"完成筛选：{processed} 篇\n"
+            f"综合入选：{selected} 篇\n"
+            f"设计与验证方向：{focus_selected} 篇"
+        ),
+        summary_url,
+    )
+
+
 def build_notification_plan(
     *,
     candidates: int,
@@ -90,22 +118,9 @@ def build_notification_plan(
     recommendation_record: PaperRecord | None,
     recommendation_failed: bool,
 ) -> NotificationPlan:
-    counts = (candidates, processed, selected, focus_selected)
-    if any(type(value) is not int or value < 0 for value in counts):
-        raise ValueError("invalid notification plan")
-    summary_url = f"{base_url.rstrip('/')}/ai_summary.html"
-    if not _is_http_url(summary_url):
-        raise ValueError("invalid notification plan")
-
-    statistics = NotificationMessage(
-        "数字 IC 文献日报",
-        (
-            f"今日候选：{candidates} 篇\n"
-            f"完成筛选：{processed} 篇\n"
-            f"综合入选：{selected} 篇\n"
-            f"设计与验证方向：{focus_selected} 篇"
-        ),
-        summary_url,
+    statistics = build_statistics_message(
+        candidates=candidates, processed=processed, selected=selected,
+        focus_selected=focus_selected, base_url=base_url,
     )
     if recommendation_failed:
         if recommendation is not None or recommendation_record is not None:

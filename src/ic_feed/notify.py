@@ -49,9 +49,14 @@ def main(argv: list[str] | None = None) -> int:
 
     try:
         if args.timeout_seconds is None:
-            send_plan(token, plan)
+            results = send_plan(token, plan)
         else:
-            send_plan(token, plan, timeout_seconds=timeout_seconds)
+            results = send_plan(token, plan, timeout_seconds=timeout_seconds)
+        accepted = sum(result is True for result in results)
+        print(
+            f"Bark delivery summary: accepted={accepted} "
+            f"failed={len(plan.messages) - accepted} total={len(plan.messages)}"
+        )
     except Exception:
         print("Bark delivery failed unexpectedly.", file=sys.stderr)
     return 0
