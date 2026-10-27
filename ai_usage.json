@@ -141,5 +141,16 @@
     "completion_tokens": 13109,
     "total_tokens": 98623,
     "token_usage_complete": true
+  },
+  {
+    "date": "2026-10-27",
+    "candidates": 15,
+    "processed": 15,
+    "selected": 11,
+    "requests": 4,
+    "prompt_tokens": 16219,
+    "completion_tokens": 3202,
+    "total_tokens": 19421,
+    "token_usage_complete": true
   }
 ]
