@@ -1,0 +1,38 @@
+name: Resend digital IC daily reports
+
+on:
+  workflow_dispatch:
+    inputs:
+      report_dates:
+        description: One or two report dates (YYYY-MM-DD), comma-separated
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  resend-reports:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out main
+        uses: actions/checkout@v6
+        with:
+          ref: main
+          persist-credentials: false
+
+      - name: Set up Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: '3.11'
+
+      - name: Install project
+        run: python -m pip install .
+
+      - name: Send requested dated reports
+        shell: bash
+        env:
+          REPORT_DATES: ${{ inputs.report_dates }}
+          BARK_TOKEN: ${{ secrets.BARK_TOKEN }}
+        run: python -m ic_feed.resend_reports --dates "$REPORT_DATES"
