@@ -1,13 +1,2 @@
 timestamp	category	url	detail
-2026-10-27T22:09:29.405618+00:00	http	ieee:journal:0278-0070	ieee status=418
-2026-10-27T22:09:29.797678+00:00	http	ieee:journal:1063-8210	ieee status=418
-2026-10-27T22:09:30.132414+00:00	http	ieee:journal:0018-9340	ieee status=418
-2026-10-27T22:09:30.468946+00:00	http	ieee:journal:0018-9200	ieee status=418
-2026-10-27T22:09:32.181249+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
-2026-10-27T22:09:33.033385+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
-2026-10-27T22:09:39.111007+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
-2026-10-27T22:09:39.471949+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
-2026-10-27T22:09:41.438091+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
-2026-10-27T22:09:41.760226+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
-2026-10-27T22:09:45.187526+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
-2026-10-27T22:09:45.516735+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
+2026-10-28T05:35:10.906304+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
