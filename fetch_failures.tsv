@@ -1,14 +1,4 @@
 timestamp	category	url	detail
-2026-11-06T06:34:50.779340+00:00	http	ieee:journal:0278-0070	ieee status=418
-2026-11-06T06:34:51.144441+00:00	http	ieee:journal:1063-8210	ieee status=418
-2026-11-06T06:34:51.532626+00:00	http	ieee:journal:0018-9340	ieee status=418
-2026-11-06T06:34:51.863916+00:00	http	ieee:journal:0018-9200	ieee status=418
-2026-11-06T06:34:53.291347+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=418
-2026-11-06T06:34:54.015364+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=418
-2026-11-06T06:35:00.469540+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
-2026-11-06T06:35:00.783428+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=418
-2026-11-06T06:35:04.122570+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=418
-2026-11-06T06:35:04.426236+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=418
-2026-11-06T06:35:09.246869+00:00	network_error	https://api.crossref.org/works?filter=prefix%3A10.1145%2Ctype%3Aproceedings-article%2Cfrom-pub-date%3A2025-12-11%2Cuntil-pub-date%3A2025-12-11&rows=300&cursor=MTc2NTQ2NTU5NjAwMCwxMC4xMTQ1JTJGMzc2MDI1MC4zNzYyMjM1&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
-2026-11-06T06:35:11.890077+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=418
-2026-11-06T06:35:12.206388+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=418
+2026-11-06T19:20:10.958331+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AProceedings+of+the+63rd+ACM%2FIEEE+Design+Automation+Conference%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc5MjY4Mzc2MjAwMCwxMC4xMTQ1JTJGMzc3MDc0My4zODA3NzMx&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	Crossref conference catalog changed; restarting query
+2026-11-06T19:20:17.141755+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-11-06T19:20:23.531070+00:00	network_error	https://api.crossref.org/works?filter=prefix%3A10.1145%2Ctype%3Aproceedings-article%2Cfrom-pub-date%3A2025-12-11%2Cuntil-pub-date%3A2025-12-11&rows=300&cursor=MTc2NTQ2NTU5NjAwMCwxMC4xMTQ1JTJGMzc2MDI1MC4zNzYyMjM1&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
