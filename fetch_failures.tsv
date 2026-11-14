@@ -1,3 +1,14 @@
 timestamp	category	url	detail
-2026-11-13T19:37:34.933155+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
-2026-11-13T19:37:41.021054+00:00	network_error	https://api.crossref.org/works?filter=prefix%3A10.1145%2Ctype%3Aproceedings-article%2Cfrom-pub-date%3A2025-12-11%2Cuntil-pub-date%3A2025-12-11&rows=300&cursor=MTc2NTQ2NTU5NjAwMCwxMC4xMTQ1JTJGMzc2MDI1MC4zNzYyMjM1&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-11-14T06:13:26.226654+00:00	http	ieee:journal:0278-0070	ieee status=502
+2026-11-14T06:13:30.883536+00:00	http	ieee:journal:1063-8210	ieee status=502
+2026-11-14T06:13:35.460094+00:00	http	ieee:journal:0018-9340	ieee status=502
+2026-11-14T06:13:40.046970+00:00	http	ieee:journal:0018-9200	ieee status=502
+2026-11-14T06:13:45.803666+00:00	http	ieee:conference:2026:Design Automation Conference	ieee status=502
+2026-11-14T06:13:50.867020+00:00	http	ieee:conference:2026:International Conference on Computer-Aided Design	ieee status=502
+2026-11-14T06:13:56.917175+00:00	network_error	https://api.crossref.org/works?filter=container-title%3AComputer+Aided+Verification%2Cfrom-pub-date%3A2026-01-01%2Cuntil-pub-date%3A2026-12-31&rows=300&cursor=MTc4NDc5NjQ2MTAwMCwxMC4xMDA3JTJGOTc4LTMtMDMyLTMyNTI2LTZfMTc%3D&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-11-14T06:14:01.449028+00:00	http	ieee:conference:2026:2026 ACM/IEEE 53rd Annual International Symposium on Computer Architecture (ISCA)	ieee status=502
+2026-11-14T06:14:06.267006+00:00	http	ieee:conference:2026:International Symposium on Microarchitecture	ieee status=502
+2026-11-14T06:14:10.899657+00:00	http	ieee:conference:2026:2026 IEEE International Symposium on High Performance Computer Architecture (HPCA)	ieee status=502
+2026-11-14T06:14:15.785317+00:00	network_error	https://api.crossref.org/works?filter=prefix%3A10.1145%2Ctype%3Aproceedings-article%2Cfrom-pub-date%3A2025-12-11%2Cuntil-pub-date%3A2025-12-11&rows=300&cursor=MTc2NTQ2NTU5NjAwMCwxMC4xMTQ1JTJGMzc2MDI1MC4zNzYyMjM1&select=DOI%2Ctitle%2Ctype%2Cabstract%2Cauthor%2Ccontainer-title%2Cpublished-online%2Cpublished-print%2CURL	invalid Crossref conference totals
+2026-11-14T06:14:21.774026+00:00	http	ieee:conference:2026:2026 IEEE International Solid-State Circuits Conference (ISSCC)	ieee status=502
+2026-11-14T06:14:26.093538+00:00	http	ieee:conference:2026:2026 IEEE/JSAP Symposium on VLSI Technology and Circuits (VLSI Technology and Circuits)	ieee status=502
